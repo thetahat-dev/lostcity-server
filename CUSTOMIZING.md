@@ -5,8 +5,8 @@ One worked example per layer. Run commands with the Node version in `.nvmrc`.
 | Layer | Worked example | Where | Takes effect after |
 |---|---|---|---|
 | Server settings | XP rate 5x | `config/world.json` and `engine/data/config/world.json` | Server restart |
-| Game content | Hans's greeting, bronze dagger stats | `content/scripts/` | Save, while the server runs |
-| Assets | Blue title logo | `content/title/`, `content/sprites/` | Save or rebuild, then reload the page |
+| Game content | The Songbook quest | `content/scripts/quests/quest_songbook/` | Save, while the server runs. New spawns need a rebuild and restart |
+| Assets | Purple title logo | `content/title/`, `content/sprites/` | Save or rebuild, then reload the page |
 | Engine | `::players` command | `engine/src/` | Server restart |
 | Client | Login screen welcome text | `webclient/src/` | Client build and copy, then reload the page |
 
@@ -21,12 +21,25 @@ Check: bury four bones on a new character. At 5x that's 90 Prayer XP, which reac
 
 ## Game content
 
-RuneScript and config files live under `content/scripts/`. The running server packs and reloads them when you save.
+RuneScript and config files live under `content/scripts/`. The running server packs and reloads them when you save. `quests/quest_songbook/` is the template for new quests.
 
-- Dialogue: `areas/area_lumbridge/scripts/hans.rs2`
-- Item stats: `skill_combat/configs/melee/daggers.obj`
+To add a quest:
 
-Check: use `::npcadd hans` to spawn Hans and talk to him. Use `::give bronze_dagger`, examine it, wield it, and look for Stab +8 on the worn equipment tab.
+1. **IDs:** append new names to the end of `content/pack/npc.pack`, `obj.pack` and `varp.pack`. Interface rows go in `interface.pack`, and their IDs also go at the end of `interface.order`.
+2. **Spawns:** add `level x z: npc_id` lines to the NPC section of `content/maps/m<x>_<z>.jm2`, then rebuild and restart. Check that the NPC can be clicked from every side, since trees block clicks.
+3. **Quest list:** add a row to `player/interfaces/questlist.if`, and raise `scroll` if the row falls past the end.
+4. **Shared hooks:** add the quest to `~count_questpoints` and the colour list in `general/scripts/quests.rs2`.
+5. **Test commands:** add debugprocs under `_test/scripts/debug/`. For The Songbook, `::~setup_songbook`, `::~songbook_woods`, `::~songbook_spawn` and `::~reset_songbook` skip the walking and set up each test.
+
+`inv_del` throws an error if the count is 0, so check `inv_total` first when the player might not have the item.
+
+Dialogue lines wrap automatically, but journal lines longer than about 55 characters wrap and lose their colour, so break them with `|`.
+
+Check: complete the quest, then read the journal and talk to Sir Austin Joseph again.
+
+### Recolors
+
+`recol` values in `.npc` and `.obj` files are 15-bit RGB, written as `(r << 10) | (g << 5) | b` with each channel from 0 to 31. Model files store a different format, so a value read from a model has to be converted first. `ColorConversion.rgb15toHsl16` in `engine/src/util/ColorConversion.ts` does the conversion the other way, and searching all 32,768 values for a match finds the source value. The goblin's skin is `11744`.
 
 ## Assets
 

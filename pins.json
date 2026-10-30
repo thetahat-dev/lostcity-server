@@ -9,7 +9,7 @@
     "content": {
       "url": "https://github.com/thetahat-dev/lostcity-content",
       "branch": "custom-274",
-      "commit": "15daf1204c00b4b9ca1e2863bcf44d93d624fd90"
+      "commit": "4b34f0e6079f55f7b4d55ed5dd2cbd6113a1334d"
     },
     "webclient": {
       "url": "https://github.com/thetahat-dev/lostcity-webclient",
