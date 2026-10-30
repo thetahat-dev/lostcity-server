@@ -4,17 +4,17 @@
     "engine": {
       "url": "https://github.com/thetahat-dev/lostcity-engine",
       "branch": "custom-274",
-      "commit": "1d25566cb53e7af1b1cb18ade8af996316c19614"
+      "commit": "147d60d19bc38f67aa16cb644262eb7aca73af5d"
     },
     "content": {
       "url": "https://github.com/thetahat-dev/lostcity-content",
       "branch": "custom-274",
-      "commit": "65b754f768b79b941b21b2a1eb3b0d1ecae3cdfe"
+      "commit": "15daf1204c00b4b9ca1e2863bcf44d93d624fd90"
     },
     "webclient": {
       "url": "https://github.com/thetahat-dev/lostcity-webclient",
       "branch": "custom-274",
-      "commit": "7d6ca61abda277cfed87d542e9e4aa3fe383b38d"
+      "commit": "680fd75ea9ebc276c41c239a403647e150aeac5c"
     },
     "javaclient": {
       "url": "https://github.com/LostCityRS/Client-Java",
