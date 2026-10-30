@@ -6,23 +6,9 @@ const fs = require('fs');
 const { ExitPromptError } = require('@inquirer/core');
 const { select } = require('@inquirer/prompts');
 
-// if you're forking this feel free to change these :) it does make some assumptions elsewhere (branch names)
-const repoOrg = 'https://github.com/LostCityRS';
-const engineRepo = 'Engine-TS';
-const contentRepo = 'Content';
-const webRepo = 'Client-TS';
-const javaRepo = 'Client-Java';
-
-function cloneRepo(repo, dir, branch) {
-    child_process.execSync(`git clone ${repoOrg}/${repo} --single-branch -b ${branch} ${dir}`, {
+function syncPins() {
+    child_process.execSync('node pins.js sync', {
         stdio: 'inherit'
-    });
-}
-
-function updateRepo(cwd) {
-    child_process.execSync('git pull', {
-        stdio: 'inherit',
-        cwd
     });
 }
 
@@ -74,41 +60,9 @@ const revInfo = {
 
 let running = true;
 async function main() {
-    if (!fs.existsSync('server.json')) {
-        await promptConfig();
-    }
+    syncPins();
 
     config = JSON.parse(fs.readFileSync('server.json', 'utf8'));
-
-    if (!fs.existsSync('engine')) {
-        cloneRepo(engineRepo, 'engine', config.rev);
-    }
-
-    if (!fs.existsSync('content')) {
-        cloneRepo(contentRepo, 'content', config.rev);
-    }
-
-    if (revInfo[config.rev]?.webclient && !fs.existsSync('webclient')) {
-        cloneRepo(webRepo, 'webclient', config.rev);
-    }
-
-    if (!fs.existsSync('javaclient')) {
-        cloneRepo(javaRepo, 'javaclient', revInfo[config.rev]?.clientBranch ?? config.rev);
-    }
-
-    if (!fs.existsSync('engine/.env') && !fs.existsSync('engine/data/config/world.json')) {
-        child_process.spawnSync('npm install', {
-            shell: true,
-            stdio: 'inherit',
-            cwd: 'engine'
-        });
-
-        child_process.spawnSync('npm run setup', {
-            shell: true,
-            stdio: 'inherit',
-            cwd: 'engine'
-        });
-    }
 
     const choice = await select({
         message: 'What would you like to do?',
@@ -116,10 +70,6 @@ async function main() {
             name: 'Start Server',
             description: 'Starts the server normally',
             value: 'start'
-        }, {
-            name: 'Update Source',
-            description: 'Pull the latest commits for all subprojects',
-            value: 'update'
         },
         revInfo[config.rev]?.webclient ? {
             name: 'Run Web Client',
@@ -150,18 +100,12 @@ async function main() {
             stdio: 'inherit',
             cwd: 'engine'
         });
-    } else if (choice === 'update') {
-        updateRepo('engine');
-        updateRepo('content');
-        updateRepo('webclient');
-        updateRepo('javaclient');
     } else if (choice === 'web') {
         if (!revInfo[config.rev]?.webclient) {
             console.log('This version does not have a webclient available (yet?), sorry.');
-        } else if (process.platform === 'win32' || process.platform === 'darwin') {
-            runOnOs('http://localhost/rs2.cgi');
         } else {
-            runOnOs('http://localhost:8888/rs2.cgi');
+            const world = JSON.parse(fs.readFileSync('engine/data/config/world.json', 'utf8'));
+            runOnOs(`http://localhost:${world.web.port}/rs2.cgi`);
         }
     } else if (choice === 'java') {
         const command = process.platform === 'win32' ? 'gradlew' : './gradlew';
@@ -181,30 +125,6 @@ async function main() {
     } else if (choice === 'quit') {
         running = false;
     }
-}
-
-async function promptConfig() {
-    const orderedRevs = Object.entries(revInfo);
-    orderedRevs.sort((a, b) => parseInt(a[0]) - parseInt(b[0])); // descending revs
-    orderedRevs.sort((a, b) => a[1].wip ? 1 : -1); // wip last
-
-    let choices = [];
-    for (const [rev, info] of orderedRevs) {
-        choices.push({
-            name: info.wip ? `${rev} (DEVELOPERS ONLY)` : rev,
-            value: rev,
-            description: info.description
-        });
-    }
-
-    const rev = await select({
-        message: 'What version are you interested in?',
-        choices
-    }, { clearPromptOnDone: true });
-
-    config.rev = rev;
-
-    fs.writeFileSync('server.json', JSON.stringify(config, null, 2));
 }
 
 async function promptAdvanced() {
@@ -236,10 +156,6 @@ async function promptAdvanced() {
             name: 'Build Java Client',
             description: '',
             value: 'build-java'
-        }, {
-            name: 'Change Version',
-            description: 'THIS OPTION WILL DESTROY YOUR WORKING FOLDER AND CREATE A NEW ONE.',
-            value: 'change-version'
         }, {
             name: 'Back',
             description: 'Go back',
@@ -281,13 +197,6 @@ async function promptAdvanced() {
             stdio: 'inherit',
             cwd: 'javaclient'
         });
-    } else if (choice === 'change-version') {
-        await promptConfig();
-
-        fs.rmSync('engine', { recursive: true, force: true });
-        fs.rmSync('content', { recursive: true, force: true });
-        fs.rmSync('webclient', { recursive: true, force: true });
-        fs.rmSync('javaclient', { recursive: true, force: true });
     }
 }
 

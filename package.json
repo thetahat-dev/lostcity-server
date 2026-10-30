@@ -1,6 +1,13 @@
 {
   "name": "@lostcityrs/server",
   "private": true,
+  "scripts": {
+    "sync": "node pins.js sync",
+    "check": "node pins.js check",
+    "record": "node pins.js record",
+    "rebuild": "node pins.js sync && npm --prefix engine ci && npm --prefix engine run clean && npm --prefix engine run build",
+    "smoke": "node smoke.js"
+  },
   "peerDependencies": {
     "typescript": "^5"
   },
