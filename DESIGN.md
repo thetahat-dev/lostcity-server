@@ -94,7 +94,7 @@ Checked in-game on a fresh account:
 
 Candidates, to be picked one at a time **(your call)**:
 
-- **The new aesthetic:** spreading the corruption across the world, such as darker ground, trees and water. How far recoloring can go still needs testing.
+- **The new aesthetic:** ground and trees work, using a test patch in the woods west of Lumbridge and `tools/corrupt_area.py`. Water, buildings, roads and the sky are still untested.
 - **More quests:** following what Mrs. K wants and what her rising does to the land.
 - **A corrupted area:** a new training area or monster, built around the corruption.
 - **A task system:** something like Slayer, hunting corrupted creatures.

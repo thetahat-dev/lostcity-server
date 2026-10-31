@@ -47,6 +47,16 @@ Images are PNGs in `content/title/` and `content/sprites/`. Keep the image size 
 
 Check: reload the page and look at the logo on the login screen.
 
+### Corrupting an area
+
+`tools/corrupt_area.py <world x> <world z> <radius>` swaps grass floors and the `tree` and `tree2` types for corrupted versions in `content/maps`. World coordinates are `map square * 64 + tile`, so the test patch is `3176 3240 18`. Clean rebuild and restart afterward.
+
+To grow an area, run it again with a larger radius. To change its shape or how trees are chosen, restore the map files with `git checkout` first, because tiles that are already corrupted are skipped.
+
+- **New floors:** add to `scripts/floors/corruption.flo`, append to `pack/flo.pack`, and add a row to the color table in `engine/tools/pack/map/Worldmap.ts`, or the build fails.
+- **New trees:** add to `scripts/skill_woodcutting/configs/trees/corrupted.loc`, append to `pack/loc.pack`, and add to `configs/trees.dbrow`, or chopping says "Nothing interesting happens."
+- **New textures:** add a PNG to `content/textures` and append to `pack/texture.pack`. The web client allows 64 textures, up from 50, and the Java client wasn't updated and may break on the new ones.
+
 ## Engine
 
 Chat commands are in `engine/src/network/game/client/handler/ClientCheatHandler.ts`, grouped by `staffModLevel`. Restart the server after changing engine code, or use `npm run dev` in `engine` to restart on each save.
